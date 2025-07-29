@@ -79,7 +79,7 @@ void PeerServer::Start()
 		}
 	}
 
-	listen( sock, SOMAXCONN );
+	listen( sock, maxClients );
 
 	setState( ServerState::Started );
 
