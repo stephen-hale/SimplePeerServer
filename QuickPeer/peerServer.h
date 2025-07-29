@@ -5,6 +5,7 @@
 #include <iostream>
 #include <list>
 #include <thread>
+#include <mutex>
 
 #include "serverHandler.h"
 #include "serverType.h"
@@ -24,6 +25,7 @@ private:
 	int maxClients = 100;
 	std::list<PeerClient*> clients;                                   // List of connected clients
 	void checkAvaliablity();                                          // Checks to see if any clients are disconnected if so delete them from list. and close there sockets.
+	std::mutex clientsMutex;                                          // Mutex for thread-safe access to the clients list
 
 public:
 	ServerHandler* Handler;                                           // Handler for server events

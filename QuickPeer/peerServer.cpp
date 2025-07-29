@@ -104,15 +104,24 @@ void PeerServer::Start()
 				continue;
 			}
 		}
+		
+		auto clientA = std::make_shared<PeerClient>( clientAddress, clientSocket );
+		{
+			std::lock_guard<std::mutex> lock( clientsMutex );
+			if ( clients.size() >= maxClients )
+			{
+				closesocket( clientSocket );
+				continue;
+			}
+			clients.push_back( clientA.get() );
+		}
 
-		PeerClient* client = new PeerClient( clientAddress, clientSocket );
+		auto client = clientA.get();
 
 		if (Handler != NULL)
 		{
 			Handler->OnClientConnect( &client );
 		}
-
-		clients.push_back( client );
 
 		std::thread clientThread( [this, client]() {
 			if (Handler != NULL)

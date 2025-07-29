@@ -1,50 +1,51 @@
 #include "peer.h"
 #include <fstream>
 
-void PeerClient::SendString( std::string& message )
+bool PeerClient::SendString( std::string& message )
 {
-	send( socket, message.c_str(), static_cast<int>(message.size()), 0 );
+	return Send<std::string>( message );
 }
 
-void PeerClient::SendInt( int value )
+bool PeerClient::SendInt( int value )
 {
-	send( socket, reinterpret_cast<const char*>(&value), sizeof( value ), 0 );
+	return Send<int>( value );
 }
 
-void PeerClient::SendFloat( float value )
+bool PeerClient::SendFloat( float value )
 {
-	send( socket, reinterpret_cast<const char*>(&value), sizeof( value ), 0 );
+	return Send<float>( value );
 }
 
-void PeerClient::SendDouble( double value )
+bool PeerClient::SendDouble( double value )
 {
-	send( socket, reinterpret_cast<const char*>(&value), sizeof( value ), 0 );
+	return Send<double>( value );
 }
 
-void PeerClient::SendBool( bool value )
+bool PeerClient::SendBool( bool value )
 {
-	char data = value ? 1 : 0; // Convert bool to char (1 for true, 0 for false)
-	send( socket, &data, sizeof( data ), 0 );
+	return Send<bool>( value );
 }
 
-void PeerClient::SendFile( const std::string& filePath )
+bool PeerClient::SendFile( const std::string& filePath )
 {
 	// Open the file
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open())
 	{
-		return;
+		return false;
 	}
 	// Read the file content into a string
 	std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	file.close();
 	// Send the file content
-	send( socket, fileContent.c_str(), static_cast<int>(fileContent.size()), 0 );
+	
+	return Send<std::string>( fileContent );
 }
 
-void PeerClient::Send( char* data )
+template<typename T>
+bool PeerClient::Send( const T &value )
 {
-	send( socket, data, sizeof(data), 0);
+	return send( socket, reinterpret_cast<const char *>(&value), sizeof( T ), 0 ) != SOCKET_ERROR;
 }
 
 void PeerClient::Disconnect()
